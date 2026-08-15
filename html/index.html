@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HM MDT (Mobile Data Terminal)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="mdt.css">
+</head>
+
+<body style="background:transparent!important;background-color:transparent!important">
+    <div id="mdt-ipad-frame" class="mdt-hidden">
+        <!-- iPad Outer Shell -->
+        <div class="mdt-ipad-shell">
+            <!-- Camera dot -->
+            <div class="mdt-ipad-camera"></div>
+            <!-- Screen area (hosts #mdt-root) -->
+            <div class="mdt-ipad-screen">
+                <div id="mdt-root">
+
+                    <!-- Login Screen (macOS Catalina Lock-Screen-Style, angelehnt an
+                         github.com/ShivamJoker/MacOS-Login-Screen) -->
+                    <div id="mdt-login-screen" class="mdt-login-screen">
+                        <nav class="mdt-login-nav">
+                            <span class="mdt-login-nav-item"><i class="fa-solid fa-shield-halved"></i> MDT</span>
+                            <span class="mdt-login-nav-item" id="mdtLoginClock">--:--</span>
+                        </nav>
+
+                        <div class="mdt-login-box">
+                            <div class="mdt-login-avatar" id="mdtLoginAvatar"><i class="fa-solid fa-user-shield"></i></div>
+                            <h3 class="mdt-login-officer" id="mdtLoginOfficer">—</h3>
+                            <div class="mdt-login-dept" id="mdtLoginDept">—</div>
+
+                            <div class="mdt-login-pill" id="mdtLoginPill" onclick="signInMDT()">
+                                <span id="mdtLoginPillText" data-l="mdt_login_connecting">Verbindung wird hergestellt...</span>
+                            </div>
+                        </div>
+
+                        <div class="mdt-login-cancel" onclick="closeMDT()">
+                            <div class="mdt-login-cancel-btn"><i class="fa-solid fa-xmark"></i></div>
+                            <span data-l="mdt_login_cancel">Abbrechen</span>
+                        </div>
+                    </div>
+
+                    <!-- Top Bar -->
+                    <div class="mdt-topbar">
+                        <div class="mdt-tb-dots">
+                            <div class="mdt-dot close" onclick="closeMDT()"></div>
+                            <div class="mdt-dot min"></div>
+                            <div class="mdt-dot max"></div>
+                        </div>
+                        <div class="mdt-tb-info">
+                            <div class="mdt-tb-avatar" id="mdtTbAvatar" data-l-title="mdt_tb_avatar_hint" title="Avatar ändern"><i class="fa-solid fa-user"></i></div>
+                            <span id="mdtOfficerName">—</span>
+                            <span class="mdt-tb-rank" id="mdtRankBadge">—</span>
+                        </div>
+                        <div class="mdt-tb-sep"></div>
+                        <div class="mdt-tb-duty" id="mdtTbSignOut" onclick="signOutMDT()" data-l-title="mdt_tb_sign_out_hint" title="Sign out">
+                            <div class="mdt-tb-duty-dot"></div>
+                            <span class="mdt-tb-duty-label" data-l="mdt_tb_on_duty">ON DUTY</span>
+                        </div>
+                        <div class="mdt-tb-sep"></div>
+                        <div class="mdt-tb-stat">
+                            <div class="mdt-tb-stat-icon teal"><i class="fa-solid fa-file-lines"></i></div>
+                            <div>
+                                <div class="mdt-tb-val" id="statReports">0</div>
+                                <div class="mdt-tb-label" data-l="mdt_tb_reports">Reports</div>
+                            </div>
+                        </div>
+                        <div class="mdt-tb-right">
+                            <button class="mdt-theme-toggle" id="mdtThemeToggle" onclick="toggleTheme()" data-l-title="mdt_tb_theme_hint" title="Dark Mode umschalten"><i class="fa-solid fa-moon"></i></button>
+                            <span id="mdtClock">—</span>
+                        </div>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="mdt-body">
+                        <!-- Sidebar -->
+                        <div class="mdt-sidebar">
+                            <div class="mdt-sidebar-section" id="sidebarSectionOps"><i class="fa-solid fa-folder"></i> <span data-l="mdt_sidebar_operations">OPERATIONS</span></div>
+                            <button class="mdt-nav-item active" data-tab="dashboard"><i
+                                    class="fa-solid fa-house"></i><span data-l="mdt_sidebar_dashboard">Dashboard</span></button>
+                            <button class="mdt-nav-item" data-tab="warrants"><i
+                                    class="fa-solid fa-gavel"></i><span data-l="mdt_sidebar_warrants">Haftbefehle</span></button>
+                            <button class="mdt-nav-item" data-tab="bolos"><i
+                                    class="fa-solid fa-bullhorn"></i><span data-l="mdt_sidebar_bolos">BOLOs</span></button>
+                            <button class="mdt-nav-item" data-tab="cases"><i
+                                    class="fa-solid fa-folder-open"></i><span data-l="mdt_sidebar_cases">Fälle</span></button>
+                            <button class="mdt-nav-item" data-tab="judgments"><i
+                                    class="fa-solid fa-gavel"></i><span data-l="mdt_sidebar_judgments">Urteile</span></button>
+
+                            <div class="mdt-sidebar-section" id="sidebarSectionRec"><i class="fa-solid fa-database"></i> <span data-l="mdt_sidebar_records">RECORDS</span></div>
+                            <button class="mdt-nav-item" data-tab="persons"><i
+                                    class="fa-solid fa-user"></i><span data-l="mdt_sidebar_persons">Personen</span></button>
+                            <button class="mdt-nav-item" data-tab="vehicles"><i
+                                    class="fa-solid fa-car"></i><span data-l="mdt_sidebar_vehicles">Fahrzeuge</span></button>
+                            <button class="mdt-nav-item" data-tab="properties"><i
+                                    class="fa-solid fa-house-chimney"></i><span data-l="mdt_sidebar_properties">Immobilien</span></button>
+                            <button class="mdt-nav-item" data-tab="weapons"><i
+                                    class="fa-solid fa-gun"></i><span data-l="mdt_sidebar_weapons">Waffen</span></button>
+                            <button class="mdt-nav-item" data-tab="evidences"><i
+                                    class="fa-solid fa-fingerprint"></i><span data-l="mdt_sidebar_evidences">Beweise</span></button>
+                            <button class="mdt-nav-item" data-tab="reports"><i
+                                    class="fa-solid fa-file-lines"></i><span data-l="mdt_sidebar_reports">Berichte</span></button>
+                            <button class="mdt-nav-item" data-tab="penalcode"><i
+                                    class="fa-solid fa-scale-balanced"></i><span data-l="mdt_sidebar_penalcode">Strafenkatalog</span></button>
+
+                            <div class="mdt-sidebar-bottom">
+                                <div class="mdt-sidebar-section"><i class="fa-solid fa-gear"></i> <span data-l="mdt_sidebar_system">SYSTEM</span></div>
+                                <button class="mdt-nav-item" data-tab="mdtsettings"><i
+                                        class="fa-solid fa-sliders"></i><span data-l="mdt_sidebar_settings">Einstellungen</span></button>
+                            </div>
+                        </div>
+                        <!-- Main -->
+                        <main class="mdt-main">
+                            <!-- Dashboard -->
+                            <section class="mdt-tab active" id="tab-dashboard">
+                                <!-- Stats Bar -->
+                                <div class="mdt-stats-bar" id="dashStatsBar">
+                                    <div class="mdt-stat-widget">
+                                        <div class="mdt-stat-value" id="statProfiles">0</div>
+                                        <div class="mdt-stat-label" data-l="mdt_stat_profiles">Profile</div>
+                                    </div>
+                                    <div class="mdt-stat-widget">
+                                        <div class="mdt-stat-value" id="statWarrants">0</div>
+                                        <div class="mdt-stat-label" data-l="mdt_stat_open_warrants">Offene Haftbefehle</div>
+                                    </div>
+                                    <div class="mdt-stat-widget">
+                                        <div class="mdt-stat-value" id="statArrestsWeek">0</div>
+                                        <div class="mdt-stat-label" data-l="mdt_stat_arrests_week">Festnahmen (7d)</div>
+                                    </div>
+                                    <div class="mdt-stat-widget">
+                                        <div class="mdt-stat-value" id="statStolenVeh">0</div>
+                                        <div class="mdt-stat-label" data-l="mdt_stat_stolen">Gestohlen</div>
+                                    </div>
+                                    <div class="mdt-stat-widget">
+                                        <div class="mdt-stat-value" id="statReportsCount">0</div>
+                                        <div class="mdt-stat-label" data-l="mdt_stat_reports_week">Berichte (7d)</div>
+                                    </div>
+                                    <div class="mdt-stat-widget">
+                                        <div class="mdt-stat-value" id="statOnlineOfficers">0</div>
+                                        <div class="mdt-stat-label" data-l="mdt_stat_online">Im Dienst</div>
+                                    </div>
+                                </div>
+
+                                <!-- Active Officers -->
+                                <div class="mdt-active-officers">
+                                    <div class="mdt-dash-section-title"><span data-l="mdt_dash_active_officers">AKTIVE BEAMTE</span> <span class="mdt-count-badge" id="dashOfficerCount">0</span></div>
+                                    <div class="mdt-officers-grid" id="dashOfficersList"></div>
+                                </div>
+
+                                <div class="mdt-dash-grid">
+                                    <div class="mdt-dash-col">
+                                        <div class="mdt-dash-section-title"><span data-l="mdt_dash_warrants">HAFTBEFEHLE</span> <span class="mdt-count-badge"
+                                                id="dashWarrantCount">0</span></div>
+                                        <div id="dashWarrants"></div>
+                                    </div>
+                                    <div class="mdt-dash-col">
+                                        <div class="mdt-dash-section-title"><span data-l="mdt_dash_recent_reports">LETZTE BERICHTE</span> <span class="mdt-count-badge"
+                                                id="dashReportCount">0</span></div>
+                                        <div id="dashRecentRecords"></div>
+                                    </div>
+                                    <div class="mdt-dash-col">
+                                        <div class="mdt-dash-section-title">DISPATCHES <span class="mdt-count-badge"
+                                                id="dashDispatchCount">0</span></div>
+                                        <div class="mdt-dispatch-pager">
+                                            <div class="mdt-dispatch-card" id="dashDispatchCard">
+                                                <div class="mdt-empty"><p>Keine Dispatches</p></div>
+                                            </div>
+                                            <div class="mdt-dispatch-nav">
+                                                <button class="mdt-dispatch-prev" id="dispatchPrev"><i class="fa-solid fa-chevron-left"></i></button>
+                                                <span class="mdt-dispatch-counter" id="dispatchCounter">0 / 0</span>
+                                                <button class="mdt-dispatch-next" id="dispatchNext"><i class="fa-solid fa-chevron-right"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mdt-bolos-section">
+                                    <div class="mdt-dash-section-title">BOLOS <span class="mdt-count-badge"
+                                            id="dashBoloCount">0</span></div>
+                                    <div id="dashBolos"></div>
+                                </div>
+                            </section>
+                            <!-- Persons -->
+                            <section class="mdt-tab" id="tab-persons">
+                                <div class="mdt-page-header">
+                                    <h1 data-l="mdt_page_persons">Personen-Suche</h1>
+                                    <div class="mdt-search-bar"><i class="fa-solid fa-magnifying-glass"></i><input
+                                            type="text" id="personSearchInput"
+                                            placeholder="Name oder CitizenID..." data-l-placeholder="mdt_search_person"><button class="mdt-search-btn"
+                                            id="personSearchBtn"><i class="fa-solid fa-arrow-right"></i></button></div>
+                                </div>
+                                <div class="mdt-results" id="personResults"></div>
+                                <div class="mdt-profile-overlay mdt-hidden" id="profileOverlay">
+                                    <div class="mdt-profile-split">
+                                        <!-- LEFT: Profile + Sub-Tabs -->
+                                        <div class="mdt-profile-left">
+                                            <button class="mdt-back-btn" id="profileBackBtn"><i
+                                                    class="fa-solid fa-arrow-left"></i> Zurück</button>
+                                            <!-- Profile Header Card -->
+                                            <div class="mdt-citizen-header">
+                                                <div class="mdt-avatar-wrap">
+                                                    <div class="mdt-citizen-avatar" id="profileAvatar">
+                                                        <i class="fa-solid fa-user"></i>
+                                                    </div>
+                                                    <button class="mdt-screenshot-btn" id="profileScreenshotBtn" title="Mugshot aufnehmen">
+                                                        <i class="fa-solid fa-camera"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="mdt-citizen-info-grid">
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_firstname">Vorname</span>
+                                                        <span class="mdt-citizen-field-value" id="profileFirstName">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_lastname">Nachname</span>
+                                                        <span class="mdt-citizen-field-value" id="profileLastName">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_dob">Geburtsdatum</span>
+                                                        <span class="mdt-citizen-field-value" id="profileDob">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_gender">Geschlecht</span>
+                                                        <span class="mdt-citizen-field-value" id="profileGender">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_nationality">Nationalität</span>
+                                                        <span class="mdt-citizen-field-value" id="profileNationality">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_job">Job</span>
+                                                        <span class="mdt-citizen-field-value" id="profileJob">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_citizenid">Citizen ID</span>
+                                                        <span class="mdt-citizen-field-value mono" id="profileCid">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label">Status</span>
+                                                        <span class="mdt-citizen-field-value" id="profileStatusBadge"><span class="mdt-badge-pill mdt-badge-green">NEUTRAL</span></span>
+                                                    </div>
+                                                </div>
+                                                <div class="mdt-citizen-header-actions">
+                                                    <button class="mdt-action-btn" id="profileEditBtn" title="Profil bearbeiten"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                </div>
+                                            </div>
+                                            <!-- Profile Sub-Tabs -->
+                                            <div class="mdt-profile-tabs-wrap" id="citizenTabsWrap">
+                                                <button class="mdt-ptab-arrow arrow-left mdt-hidden" id="citizenTabsLeft"><i class="fa-solid fa-chevron-left"></i></button>
+                                                <div class="mdt-profile-tabs" id="citizenTabsBar">
+                                                    <button class="mdt-ptab active" data-ptab="pvehicles"><i class="fa-solid fa-car"></i> <span data-l="mdt_tab_vehicles">Fahrzeuge</span> <span class="mdt-ptab-count" id="vehicleCount">0</span></button>
+                                                    <button class="mdt-ptab" data-ptab="pproperties"><i class="fa-solid fa-house-chimney"></i> <span data-l="mdt_tab_properties">Immobilien</span> <span class="mdt-ptab-count" id="pPropertyCount">0</span></button>
+                                                    <button class="mdt-ptab" data-ptab="plicenses"><i class="fa-solid fa-id-card"></i> <span data-l="mdt_tab_licenses">Lizenzen</span> <span class="mdt-ptab-count" id="pLicenseCount">0</span></button>
+                                                    <button class="mdt-ptab" data-ptab="precords"><i class="fa-solid fa-file-invoice"></i> <span data-l="mdt_tab_records">Strafregister</span> <span class="mdt-ptab-count" id="recordCount">0</span></button>
+                                                    <button class="mdt-ptab" data-ptab="pwarrants"><i class="fa-solid fa-file-circle-exclamation"></i> <span data-l="mdt_tab_warrants">Haftbefehle</span> <span class="mdt-ptab-count" id="pWarrantCount">0</span></button>
+                                                    <button class="mdt-ptab" data-ptab="preports"><i class="fa-solid fa-file-lines"></i> <span data-l="mdt_tab_reports">Berichte</span> <span class="mdt-ptab-count" id="pReportCount">0</span></button>
+                                                    <button class="mdt-ptab" data-ptab="pjudgments"><i class="fa-solid fa-gavel"></i> <span data-l="mdt_sidebar_judgments">Urteile</span></button>
+                                                    <button class="mdt-ptab" data-ptab="phistory"><i class="fa-solid fa-clock-rotate-left"></i> <span data-l="mdt_tab_history_log">Verlauf</span></button>
+                                                </div>
+                                                <button class="mdt-ptab-arrow arrow-right" id="citizenTabsRight"><i class="fa-solid fa-chevron-right"></i></button>
+                                            </div>
+                                            <div class="mdt-ptab-content active" id="ptab-pvehicles"></div>
+                                            <div class="mdt-ptab-content" id="ptab-pproperties"></div>
+                                            <div class="mdt-ptab-content" id="ptab-plicenses"></div>
+                                            <div class="mdt-ptab-content" id="ptab-precords"></div>
+                                            <div class="mdt-ptab-content" id="ptab-pwarrants"></div>
+                                            <div class="mdt-ptab-content" id="ptab-preports"></div>
+                                            <div class="mdt-ptab-content" id="ptab-pjudgments"></div>
+                                            <div class="mdt-ptab-content" id="ptab-phistory"></div>
+                                        </div>
+                                        <!-- RIGHT: Notes -->
+                                        <div class="mdt-profile-right">
+                                            <button class="mdt-btn mdt-btn-primary" style="width:calc(100% - 32px);margin:24px 16px 12px" id="profileAddNoteBtn"><i class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_note">Notiz erstellen</span></button>
+                                            <div class="mdt-notes-list" id="profileNotesList"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <!-- Vehicles -->
+                            <section class="mdt-tab" id="tab-vehicles">
+                                <div class="mdt-page-header">
+                                    <h1 data-l="mdt_page_vehicles">Fahrzeug-Suche</h1>
+                                    <div class="mdt-search-bar"><i class="fa-solid fa-car"></i><input type="text"
+                                            id="vehicleSearchInput" placeholder="Kennzeichen..." data-l-placeholder="mdt_search_vehicle"><button
+                                            class="mdt-search-btn" id="vehicleSearchBtn"><i
+                                                class="fa-solid fa-arrow-right"></i></button></div>
+                                </div>
+                                <div class="mdt-results" id="vehicleResults"></div>
+                                <!-- Vehicle Profile Overlay -->
+                                <div class="mdt-profile-overlay mdt-hidden" id="vehicleProfileOverlay">
+                                    <div class="mdt-profile-split">
+                                        <!-- LEFT: Vehicle Info -->
+                                        <div class="mdt-profile-left">
+                                            <button class="mdt-back-btn" id="vehicleProfileBackBtn"><i
+                                                    class="fa-solid fa-arrow-left"></i> Zurück</button>
+                                            <!-- Vehicle Header Card -->
+                                            <div class="mdt-citizen-header">
+                                                <div class="mdt-citizen-avatar" id="vehProfileAvatar" style="background:rgba(0,122,255,0.06)"><i class="fa-solid fa-car" style="font-size:28px;color:#007AFF"></i></div>
+                                                <button class="mdt-screenshot-btn" id="vehScreenshotBtn" title="Fahrzeug-Foto aufnehmen">
+                                                    <i class="fa-solid fa-camera"></i>
+                                                </button>
+                                                <div class="mdt-citizen-info-grid">
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_vehicle_plate">Kennzeichen</span>
+                                                        <span class="mdt-citizen-field-value mono" id="vehProfilePlate">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_vehicle_model">Modell</span>
+                                                        <span class="mdt-citizen-field-value" id="vehProfileModel">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_vehicle_color">Farbe</span>
+                                                        <span class="mdt-citizen-field-value" id="vehProfileColor">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_vehicle_class">Klasse</span>
+                                                        <span class="mdt-citizen-field-value" id="vehProfileClass">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_vehicle_owner">Halter</span>
+                                                        <span class="mdt-citizen-field-value" id="vehProfileOwner">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_citizenid">Citizen ID</span>
+                                                        <span class="mdt-citizen-field-value mono" id="vehProfileCid">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label">Status</span>
+                                                        <span class="mdt-citizen-field-value" id="vehProfileStatusBadge"><span class="mdt-badge-pill mdt-badge-green"data-l="mdt_vehicle_status_clean">CLEAN</span></span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_vehicle_stolen">Gestohlen</span>
+                                                        <span class="mdt-citizen-field-value" id="vehProfileStolen"><span class="mdt-badge-pill mdt-badge-green"data-l="mdt_vehicle_stolen_no">NEIN</span></span>
+                                                    </div>
+                                                </div>
+                                                <div class="mdt-citizen-header-actions">
+                                                    <button class="mdt-action-btn" id="vehProfileEditBtn" title="Fahrzeug bearbeiten"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                </div>
+                                            </div>
+                                            <!-- Vehicle Sub-Tabs -->
+                                            <div class="mdt-profile-tabs">
+                                                <button class="mdt-ptab active" data-vptab="vowner"><i class="fa-solid fa-user"></i> <span data-l="mdt_tab_halter"data-l="mdt_vehicle_owner">Halter</span></button>
+                                                <button class="mdt-ptab" data-vptab="vflags"><i class="fa-solid fa-flag"></i> <span data-l="mdt_tab_flags">Flags</span> <span class="mdt-ptab-count" id="vehFlagCount">0</span></button>
+                                                <button class="mdt-ptab" data-vptab="vhistory"><i class="fa-solid fa-clock-rotate-left"></i> <span data-l="mdt_tab_history">Historie</span> <span class="mdt-ptab-count" id="vehHistoryCount">0</span></button>
+                                                <button class="mdt-ptab" data-vptab="vevidence"><i class="fa-solid fa-fingerprint"></i> <span data-l="mdt_tab_evidence">Beweise</span> <span class="mdt-ptab-count" id="vehEvidenceCount">0</span></button>
+                                            </div>
+                                            <div class="mdt-vptab-content active" id="vptab-vowner"></div>
+                                            <div class="mdt-vptab-content" id="vptab-vflags"></div>
+                                            <div class="mdt-vptab-content" id="vptab-vhistory"></div>
+                                            <div class="mdt-vptab-content" id="vptab-vevidence"></div>
+                                        </div>
+                                        <!-- RIGHT: Vehicle Notes -->
+                                        <div class="mdt-profile-right">
+                                            <div class="mdt-notes-header">
+                                                <div>
+                                                    <div class="mdt-notes-title" data-l="mdt_notes_title">Notes</div>
+                                                    <div class="mdt-notes-subtitle"data-l="mdt_notes_vehicle_sub">Notizen zum Fahrzeug</div>
+                                                </div>
+                                                <button class="mdt-btn mdt-btn-primary" id="vehAddNoteBtn"><i class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_note">Notiz erstellen</span></button>
+                                            </div>
+                                            <div class="mdt-notes-list" id="vehNotesList"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <!-- Warrants -->
+                            <section class="mdt-tab" id="tab-warrants">
+                                <div class="mdt-page-header mdt-page-header-actions">
+                                    <h1 data-l="mdt_page_warrants">Haftbefehle</h1><button class="mdt-btn mdt-btn-primary" id="warrantAddBtn"><i
+                                            class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_warrant">Haftbefehl erstellen</span></button>
+                                </div>
+                                <div class="mdt-results" id="warrantResults"></div>
+                            </section>
+                            <!-- BOLOs -->
+                            <section class="mdt-tab" id="tab-bolos">
+                                <div class="mdt-page-header mdt-page-header-actions">
+                                    <h1 data-l="mdt_page_bolos">BOLOs</h1><button class="mdt-btn mdt-btn-primary" id="boloAddBtn"><i
+                                            class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_bolo">BOLO erstellen</span></button>
+                                </div>
+                                <div class="mdt-results" id="boloResults"></div>
+                            </section>
+                            <!-- Properties -->
+                            <section class="mdt-tab" id="tab-properties">
+                                <div class="mdt-page-header mdt-page-header-actions">
+                                    <h1 data-l="mdt_page_properties">Immobilien-Register</h1>
+                                    <button class="mdt-btn mdt-btn-primary" id="propertyAddBtn"><i
+                                            class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_property">Immobilie erfassen</span></button>
+                                </div>
+                                <div class="mdt-search-bar" style="margin-bottom:16px"><i class="fa-solid fa-magnifying-glass"></i><input
+                                        type="text" id="propertySearchInput"
+                                        placeholder="Adresse, Eigentümer oder ID..." data-l-placeholder="mdt_search_property"><button class="mdt-search-btn"
+                                        id="propertySearchBtn"><i class="fa-solid fa-arrow-right"></i></button></div>
+                                <div class="mdt-results" id="propertyResults"></div>
+                                <!-- Property Profile Overlay -->
+                                <div class="mdt-profile-overlay mdt-hidden" id="propertyProfileOverlay">
+                                    <div class="mdt-profile-split">
+                                        <!-- LEFT: Property Info -->
+                                        <div class="mdt-profile-left">
+                                            <button class="mdt-back-btn" id="propProfileBackBtn"><i
+                                                    class="fa-solid fa-arrow-left"></i> Zurück</button>
+                                            <!-- Property Header Card -->
+                                            <div class="mdt-citizen-header">
+                                                <div class="mdt-citizen-avatar" id="propProfileAvatar" style="background:rgba(90,200,250,0.06)"><i class="fa-solid fa-house-chimney" style="font-size:28px;color:#5AC8FA"></i></div>
+                                                <div class="mdt-citizen-info-grid">
+                                                    <div class="mdt-citizen-field" style="grid-column:1/4">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_property_address">Adresse</span>
+                                                        <span class="mdt-citizen-field-value" id="propProfileAddress">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_property_type">Art</span>
+                                                        <span class="mdt-citizen-field-value" id="propProfileType">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_property_owner">Eigentümer</span>
+                                                        <span class="mdt-citizen-field-value" id="propProfileOwner">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_profile_citizenid">Citizen ID</span>
+                                                        <span class="mdt-citizen-field-value mono" id="propProfileCid">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label">Status</span>
+                                                        <span class="mdt-citizen-field-value" id="propProfileStatusBadge"><span class="mdt-badge-pill mdt-badge-green"data-l="mdt_property_status_clear">UNAUFFÄLLIG</span></span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_property_officer">Erfasst von</span>
+                                                        <span class="mdt-citizen-field-value" id="propProfileOfficer">—</span>
+                                                    </div>
+                                                    <div class="mdt-citizen-field">
+                                                        <span class="mdt-citizen-field-label"data-l="mdt_property_date">Erfasst am</span>
+                                                        <span class="mdt-citizen-field-value" id="propProfileDate">—</span>
+                                                    </div>
+                                                </div>
+                                                <div class="mdt-citizen-header-actions">
+                                                    <button class="mdt-action-btn" id="propProfileEditBtn" title="Immobilie bearbeiten"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                </div>
+                                            </div>
+                                            <!-- Property Sub-Tabs -->
+                                            <div class="mdt-profile-tabs">
+                                                <button class="mdt-ptab active" data-proptab="powner"><i class="fa-solid fa-user"></i> <span data-l="mdt_tab_owner"data-l="mdt_property_owner">Eigentümer</span></button>
+                                                <button class="mdt-ptab" data-proptab="pflags"><i class="fa-solid fa-flag"></i> <span data-l="mdt_tab_flags">Flags</span> <span class="mdt-ptab-count" id="propFlagCount">0</span></button>
+                                                <button class="mdt-ptab" data-proptab="phistory"><i class="fa-solid fa-clock-rotate-left"></i> <span data-l="mdt_tab_history">Halter-Akte</span> <span class="mdt-ptab-count" id="propHistoryCount">0</span></button>
+                                                <button class="mdt-ptab" data-proptab="pevidence"><i class="fa-solid fa-fingerprint"></i> <span data-l="mdt_tab_evidence">Beweise</span> <span class="mdt-ptab-count" id="propEvidenceCount">0</span></button>
+                                            </div>
+                                            <div class="mdt-proptab-content active" id="proptab-powner"></div>
+                                            <div class="mdt-proptab-content" id="proptab-pflags"></div>
+                                            <div class="mdt-proptab-content" id="proptab-phistory"></div>
+                                            <div class="mdt-proptab-content" id="proptab-pevidence"></div>
+                                        </div>
+                                        <!-- RIGHT: Property Notes -->
+                                        <div class="mdt-profile-right">
+                                            <div class="mdt-notes-header">
+                                                <div>
+                                                    <div class="mdt-notes-title" data-l="mdt_notes_title">Notes</div>
+                                                    <div class="mdt-notes-subtitle"data-l="mdt_notes_property_sub">Notizen zur Immobilie</div>
+                                                </div>
+                                                <button class="mdt-btn mdt-btn-primary" id="propAddNoteBtn"><i class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_note">Notiz erstellen</span></button>
+                                            </div>
+                                            <div class="mdt-notes-list" id="propNotesList"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+                            <!-- Weapons -->
+                            <section class="mdt-tab" id="tab-weapons">
+                                <div class="mdt-page-header mdt-page-header-actions">
+                                    <h1 data-l="mdt_page_weapons">Waffen-Register</h1>
+                                    <button class="mdt-btn mdt-btn-primary" id="weaponAddBtn"><i
+                                            class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_weapon">Waffe erfassen</span></button>
+                                </div>
+                                <div class="mdt-search-bar" style="margin-bottom:16px"><i class="fa-solid fa-magnifying-glass"></i><input
+                                        type="text" id="weaponSearchInput"
+                                        placeholder="Seriennummer, Besitzer oder Waffentyp..." data-l-placeholder="mdt_search_weapon"><button class="mdt-search-btn"
+                                        id="weaponSearchBtn"><i class="fa-solid fa-arrow-right"></i></button></div>
+                                <div class="mdt-results" id="weaponResults"></div>
+                            </section>
+                            <!-- Evidences -->
+                            <section class="mdt-tab" id="tab-evidences">
+                                <div class="mdt-page-header mdt-page-header-actions">
+                                    <h1 data-l="mdt_page_evidences">Beweismittel</h1>
+                                    <button class="mdt-btn mdt-btn-primary" id="evidenceAddBtn"><i
+                                            class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_evidence">Beweis erfassen</span></button>
+                                </div>
+                                <div class="mdt-search-bar" style="margin-bottom:16px"><i class="fa-solid fa-magnifying-glass"></i><input
+                                        type="text" id="evidenceSearchInput"
+                                        placeholder="Fall-Nr., Typ oder Beschreibung..." data-l-placeholder="mdt_search_evidence"><button class="mdt-search-btn"
+                                        id="evidenceSearchBtn"><i class="fa-solid fa-arrow-right"></i></button></div>
+                                <div class="mdt-results" id="evidenceResults"></div>
+                            </section>
+
+                            <!-- Reports -->
+                            <section class="mdt-tab" id="tab-reports">
+                                <div class="mdt-page-header mdt-page-header-actions">
+                                    <h1 data-l="mdt_page_reports">Berichte</h1>
+                                    <button class="mdt-btn mdt-btn-primary" id="reportAddBtn"><i
+                                            class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_report">Bericht erstellen</span></button>
+                                </div>
+                                <div class="mdt-search-bar" style="margin-bottom:16px"><i class="fa-solid fa-magnifying-glass"></i><input
+                                        type="text" id="reportSearchInput"
+                                        placeholder="Titel, Inhalt, CID oder Kennzeichen..." data-l-placeholder="mdt_search_report"><button class="mdt-search-btn"
+                                        id="reportSearchBtn"><i class="fa-solid fa-arrow-right"></i></button></div>
+                                <div class="mdt-results" id="reportResults"></div>
+                            </section>
+
+                            <!-- Judgments -->
+                            <section class="mdt-tab" id="tab-judgments">
+                                <div class="mdt-page-header">
+                                    <h1 data-l="mdt_page_judgments">Urteile</h1>
+                                </div>
+                                <div class="mdt-judgment-layout">
+                                    <!-- Left: Citizens + Charges -->
+                                    <div class="mdt-judgment-left">
+                                        <!-- Selected Citizens -->
+                                        <div class="mdt-judgment-section">
+                                            <div class="mdt-judgment-section-header">
+                                                <span data-l="mdt_judgment_citizens">Ausgewählte Bürger</span>
+                                                <span class="mdt-count-badge" id="judgCitizenCount">0</span>
+                                                <button class="mdt-btn mdt-btn-primary" style="margin-left:auto;font-size:12px" id="judgAddCitizenBtn"><i class="fa-solid fa-plus"></i> <span data-l="mdt_judgment_add_citizen">Bürger hinzufügen</span></button>
+                                            </div>
+                                            <div class="mdt-judgment-list" id="judgCitizenList">
+                                                <div class="mdt-empty" style="padding:20px"><p data-l="mdt_judgment_no_citizens">Keine Bürger ausgewählt</p></div>
+                                            </div>
+                                        </div>
+                                        <!-- Selected Charges -->
+                                        <div class="mdt-judgment-section" style="margin-top:16px">
+                                            <div class="mdt-judgment-section-header">
+                                                <span data-l="mdt_judgment_charges">Ausgewählte Anklagen</span>
+                                                <span class="mdt-count-badge" id="judgChargeCount">0</span>
+                                                <button class="mdt-btn mdt-btn-primary" style="margin-left:auto;font-size:12px" id="judgAddChargeBtn"><i class="fa-solid fa-plus"></i> <span data-l="mdt_judgment_add_charge">Anklage hinzufügen</span></button>
+                                            </div>
+                                            <div class="mdt-judgment-list" id="judgChargeList">
+                                                <div class="mdt-empty" style="padding:20px"><p data-l="mdt_judgment_no_charges">Keine Anklagen. Füge Anklagen hinzu um das Urteil zu erstellen.</p></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Right: Summary -->
+                                    <div class="mdt-judgment-right">
+                                        <div class="mdt-judgment-summary">
+                                            <div class="mdt-judgment-summary-title" data-l="mdt_judgment_summary">Urteilszusammenfassung</div>
+                                            <div class="mdt-judgment-summary-row">
+                                                <span><i class="fa-solid fa-dollar-sign" style="color:#34C759;width:18px"></i> <span data-l="mdt_judgment_total_fine">Gesamtstrafe</span></span>
+                                                <span class="mdt-judgment-amount" id="judgTotalFine" style="color:#34C759">$0</span>
+                                            </div>
+                                            <div class="mdt-judgment-summary-row">
+                                                <span><i class="fa-solid fa-clock" style="color:#FF9500;width:18px"></i> <span data-l="mdt_judgment_total_jail">Gesamthaft</span></span>
+                                                <span class="mdt-judgment-amount" id="judgTotalJail" style="color:#FF9500">0 Mon.</span>
+                                            </div>
+                                        </div>
+                                        <!-- Multiplier + Plea Deal -->
+                                        <div style="background:var(--mdt-surface-alt);border-radius:14px;padding:14px">
+                                            <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px">
+                                                <div style="flex:1">
+                                                    <label style="font-size:11px;font-weight:700;color:var(--mdt-text-muted);text-transform:uppercase" data-l="mdt_judgment_multiplier">Multiplikator</label>
+                                                    <select class="mdt-form-select" id="judgMultiplier" style="margin-top:4px;font-size:13px">
+                                                        <option value="0.5">0.5x — Kooperation</option>
+                                                        <option value="0.75">0.75x — Mildernde Umstände</option>
+                                                        <option value="1" selected>1.0x — Standard</option>
+                                                        <option value="1.5">1.5x — Erschwerend</option>
+                                                        <option value="2">2.0x — Wiederholungstäter</option>
+                                                        <option value="3">3.0x — Schwere Umstände</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;color:var(--mdt-text-secondary)">
+                                                <input type="checkbox" id="judgPleaDeal" style="width:18px;height:18px;accent-color:#007AFF">
+                                                <span><i class="fa-solid fa-handshake" style="color:#007AFF;margin-right:4px"></i> <span data-l="mdt_judgment_plea_deal">Plea Deal (-50%)</span></span>
+                                            </label>
+                                        </div>
+                                        <div class="mdt-judgment-note-section">
+                                            <div class="mdt-judgment-summary-title" data-l="mdt_judgment_note">Urteilsbemerkung</div>
+                                            <textarea class="mdt-form-textarea" id="judgNoteInput" rows="4" style="width:100%;box-sizing:border-box;margin-top:4px" placeholder="..." data-l-placeholder="mdt_judgment_note_hint"></textarea>
+                                        </div>
+                                        <div class="mdt-judgment-counters">
+                                            <div class="mdt-judgment-counter-row">
+                                                <span data-l="mdt_judgment_citizens">Bürger</span>
+                                                <span class="mdt-badge-pill mdt-badge-blue" id="judgSumCitizens">0</span>
+                                            </div>
+                                            <div class="mdt-judgment-counter-row">
+                                                <span data-l="mdt_judgment_charges">Anklagen</span>
+                                                <span class="mdt-badge-pill mdt-badge-blue" id="judgSumCharges">0</span>
+                                            </div>
+                                        </div>
+                                        <button class="mdt-btn mdt-btn-primary" style="width:100%;margin-top:12px;padding:12px;font-size:14px" id="judgIssueBtn">
+                                            <i class="fa-solid fa-gavel"></i> <span data-l="mdt_judgment_issue">Urteil aussprechen</span>
+                                        </button>
+                                        <button class="mdt-btn mdt-btn-ghost" style="width:100%;margin-top:8px;font-size:12px" id="judgHistoryBtn">
+                                            <i class="fa-solid fa-clock-rotate-left"></i> <span data-l="mdt_judgment_history">Urteilshistorie</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Penal Code -->
+                            <section class="mdt-tab" id="tab-penalcode">
+                                <div class="mdt-page-header mdt-page-header-actions">
+                                    <h1 data-l="mdt_page_penalcode">Strafenkatalog</h1>
+                                    <button class="mdt-btn mdt-btn-primary mdt-hidden" id="penalAddBtn"><i
+                                            class="fa-solid fa-plus"></i> <span data-l="mdt_btn_add_offense">Straftat hinzufügen</span></button>
+                                </div>
+                                <div class="mdt-search-bar" style="margin-bottom:16px"><i class="fa-solid fa-magnifying-glass"></i><input
+                                        type="text" id="penalSearchInput"
+                                        placeholder="ID, Titel oder Kategorie..." data-l-placeholder="mdt_search_penal"><button class="mdt-search-btn"
+                                        id="penalSearchBtn"><i class="fa-solid fa-arrow-right"></i></button></div>
+                                <div class="mdt-results" id="penalResults"></div>
+                            </section>
+
+                            <!-- Cases -->
+                            <section class="mdt-tab" id="tab-cases">
+                                <div class="mdt-page-header mdt-page-header-actions">
+                                    <h1 data-l="mdt_page_cases">Fall-Akten</h1>
+                                    <button class="mdt-btn mdt-btn-primary" id="caseAddBtn"><i
+                                            class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_case">Fall anlegen</span></button>
+                                </div>
+                                <div class="mdt-search-bar" style="margin-bottom:16px"><i class="fa-solid fa-magnifying-glass"></i><input
+                                        type="text" id="caseSearchInput"
+                                        placeholder="Fall-Nr., Titel oder Beamter..." data-l-placeholder="mdt_search_case"><button class="mdt-search-btn"
+                                        id="caseSearchBtn"><i class="fa-solid fa-arrow-right"></i></button></div>
+                                <div class="mdt-results" id="caseResults"></div>
+                            </section>
+
+                            <!-- MDT Settings / Access Management -->
+                            <section class="mdt-tab" id="tab-mdtsettings">
+                                <div class="mdt-page-header">
+                                    <h1 data-l="mdt_page_access">Zugriffsverwaltung</h1>
+                                </div>
+                                <div style="margin-bottom:16px;display:flex;justify-content:space-between;align-items:center">
+                                    <p style="font-size:13px;color:var(--mdt-text-muted);margin:0" data-l="mdt_access_desc">Welche Rollen auf welche MDT-Bereiche zugreifen dürfen.</p>
+                                    <button class="mdt-btn mdt-btn-primary" id="accessAddBtn" style="font-size:12px"><i class="fa-solid fa-plus"></i> <span data-l="mdt_access_add_role">Rolle hinzufügen</span></button>
+                                </div>
+                                <div class="mdt-results" id="accessRoleList"></div>
+                            </section>
+
+                            <!-- Case Detail Overlay -->
+                            <div class="mdt-profile-overlay mdt-hidden" id="caseDetailOverlay">
+                                <div class="mdt-profile-split">
+                                    <!-- Left: Case Content -->
+                                    <div class="mdt-profile-left" style="flex:1;overflow-y:auto">
+                                        <div class="mdt-profile-back">
+                                            <button class="mdt-btn mdt-btn-ghost" id="caseBackBtn"><i class="fa-solid fa-arrow-left"></i> <span data-l="mdt_btn_back">Zurück</span></button>
+                                            <div style="display:flex;gap:8px;margin-left:auto">
+                                                <button class="mdt-btn mdt-btn-primary" id="caseEditBtn"><i class="fa-solid fa-pen"></i> <span data-l="mdt_case_edit">Bearbeiten</span></button>
+                                            </div>
+                                        </div>
+                                        <!-- Case Header -->
+                                        <div class="mdt-case-header" id="caseHeader"></div>
+                                        <!-- Case Sub-Tabs -->
+                                        <div class="mdt-profile-tabs" style="margin-top:16px">
+                                            <button class="mdt-ptab active" data-ctab="cpersons"><i class="fa-solid fa-users"></i> <span data-l="mdt_case_persons">Personen</span></button>
+                                            <button class="mdt-ptab" data-ctab="cvehicles"><i class="fa-solid fa-car"></i> <span data-l="mdt_tab_vehicles">Fahrzeuge</span></button>
+                                            <button class="mdt-ptab" data-ctab="cevidence"><i class="fa-solid fa-fingerprint"></i> <span data-l="mdt_tab_evidence">Beweise</span></button>
+                                            <button class="mdt-ptab" data-ctab="creports"><i class="fa-solid fa-file-lines"></i> <span data-l="mdt_tab_reports">Berichte</span></button>
+                                            <button class="mdt-ptab" data-ctab="ctimeline"><i class="fa-solid fa-clock-rotate-left"></i> <span data-l="mdt_case_timeline">Verlauf</span></button>
+                                        </div>
+                                        <div class="mdt-case-tab-content" id="ctab-cpersons"></div>
+                                        <div class="mdt-case-tab-content mdt-hidden" id="ctab-cvehicles"></div>
+                                        <div class="mdt-case-tab-content mdt-hidden" id="ctab-cevidence"></div>
+                                        <div class="mdt-case-tab-content mdt-hidden" id="ctab-creports"></div>
+                                        <div class="mdt-case-tab-content mdt-hidden" id="ctab-ctimeline"></div>
+                                    </div>
+                                    <!-- Right: Case Notes -->
+                                    <div class="mdt-profile-right">
+                                        <button class="mdt-btn mdt-btn-primary" style="width:calc(100% - 32px);margin:24px 16px 12px" id="caseNoteAddBtn"><i class="fa-solid fa-plus"></i> <span data-l="mdt_btn_create_note">Notiz erstellen</span></button>
+                                        <div class="mdt-notes-list" id="caseNotesList"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div><!-- /#mdt-root -->
+            </div><!-- /.mdt-ipad-screen -->
+            <!-- Home button -->
+            <div class="mdt-ipad-home">
+                <div class="mdt-ipad-home-inner"></div>
+            </div>
+        </div><!-- /.mdt-ipad-shell -->
+    </div><!-- /#mdt-ipad-frame -->
+
+    <!-- Lightbox -->
+    <div id="mdtLightbox" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;cursor:zoom-out" onclick="this.style.display='none'">
+        <img id="mdtLightboxImg" src="" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,0.5);object-fit:contain">
+    </div>
+
+    <!-- MDT Modal -->
+    <div class="mdt-modal-overlay mdt-hidden" id="mdtModal">
+        <div class="mdt-modal">
+            <div class="mdt-modal-header">
+                <h3 id="modalTitle"></h3><button class="mdt-modal-close" id="modalCloseBtn"><i
+                        class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="mdt-modal-body" id="modalBody"></div>
+            <div class="mdt-modal-footer"><button class="mdt-btn mdt-btn-ghost"
+                    id="modalCancelBtn" data-l="mdt_btn_cancel">Cancel</button><button class="mdt-btn mdt-btn-primary"
+                    id="modalConfirmBtn" data-l="mdt_btn_confirm">Confirm</button></div>
+        </div>
+    </div>
+
+    <script src="mdt.js"></script>
+</body>
+
+</html>
